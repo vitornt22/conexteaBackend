@@ -1,0 +1,96 @@
+from django.http import HttpResponse
+from datetime import date, timedelta
+from student.models import Student
+from teacher.models import Teacher
+from .models import CheckIn, ActionModel, Activity, ReviewModel
+import random
+
+def populate_student_records(request):
+    start_date = date(date.today().year, 2, 1)
+    end_date = date.today() - timedelta(days=1)
+
+    students = Student.objects.all()
+    teacher = Teacher.objects.get(id=1)
+
+    descriptions_checkin = [
+        "Chegou calmo e atento.",
+        "Mostrou-se ansioso ao chegar.",
+        "Estava animado e sorridente.",
+        "Chegou um pouco cansado, mas disposto."
+    ]
+
+    descriptions_action = [
+        "Teve iniciativa em ajudar os colegas.",
+        "Realizou a tarefa com orientação.",
+        "Demonstrou interesse durante a atividade.",
+        "Apresentou resistência, mas completou a tarefa."
+    ]
+
+    activity_comments = {
+        '1': "Participou das atividades de leitura e comunicação.",
+        '2': "Desenvolveu raciocínio em jogos e desafios cognitivos.",
+        '3': "Praticou movimentos com boa coordenação.",
+        '4': "Explorou materiais sensoriais com curiosidade.",
+        '5': "Organizou seus materiais de forma autônoma.",
+        '6': "Interagiu de forma positiva com os colegas."
+    }
+
+    participation_choices = ['1', '2', '3']
+    assessment_choices = ['1', '2', '3']
+
+    current_date = start_date
+    while current_date <= end_date:
+        for student in students:
+            # CheckIn
+            CheckIn.objects.create(
+                teacher=teacher,
+                student=student,
+                date=current_date,
+                emoction_id=random.randint(1, 5),
+                description=random.choice(descriptions_checkin)
+            )
+
+            # ActionModel
+            ActionModel.objects.create(
+                teacher=teacher,
+                student=student,
+                date=current_date,
+                emoction_id=random.randint(1, 5),
+                description=random.choice(descriptions_action)
+            )
+
+            # Activity
+            activity_type = random.choice(['1', '2', '3', '4', '5', '6'])
+            participation = random.choice(participation_choices)
+            Activity.objects.create(
+                teacher=teacher,
+                student=student,
+                date=current_date,
+                activity_type=activity_type,
+                participation=participation,
+                description=activity_comments[activity_type],
+                student_performance="Desempenho compatível com o proposto para o dia."
+            )
+
+            # ReviewModel
+            ReviewModel.objects.create(
+                teacher=teacher,
+                student=student,
+                date=current_date,
+                interation=random.choice(assessment_choices),
+                concentration=random.choice(assessment_choices),
+                autonomy=random.choice(assessment_choices),
+                comunication=random.choice(assessment_choices),
+                problemSolving=random.choice(assessment_choices),
+                compreension=random.choice(assessment_choices),
+                regulation=random.choice(assessment_choices),
+                respect=random.choice(assessment_choices),
+                resistance=random.choice(assessment_choices),
+                challenges=random.choice(assessment_choices),
+                participation=random.choice(assessment_choices),
+                punctuality=random.choice(assessment_choices)
+            )
+
+        current_date += timedelta(days=1)
+
+    return HttpResponse("Registros criados com sucesso!")
